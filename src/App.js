@@ -10,7 +10,7 @@ function App() {
   const [modalInsertar, setModalInsertar]= useState(false);
   const [modalEditar, setModalEditar]= useState(false);
   const [modalEliminar, setModalEliminar]= useState(false);
-  const [frameworkSeleccionado, setFrameworkSeleccionado]=useState({
+  const [claseSeleccionada, setClaseSeleccionada]=useState({
     id: '',
     name: '',
     descripcion: ''
@@ -18,11 +18,11 @@ function App() {
 
   const handleChange=e=>{
     const {name, value}=e.target;
-    setFrameworkSeleccionado((prevState)=>({
+    setClaseSeleccionada((prevState)=>({
       ...prevState,
       [name]: value
     }))
-    console.log(frameworkSeleccionado);
+    console.log(claseSeleccionada);
   }
 
   const abrirCerrarModalInsertar=()=>{
@@ -45,13 +45,13 @@ function App() {
       console.log(error);
     })
   }
-
   const peticionPost=async()=>{
-    var f = new FormData();
-    f.append("brandName", frameworkSeleccionado.name);
-    f.append("descBrand", frameworkSeleccionado.descripcion);
-    f.append("METHOD", "POST");
-    await axios.post(methodUrl, f)
+    await axios.post(methodUrl, 
+      {
+        "name": claseSeleccionada.name,
+        "descripcion": claseSeleccionada.descripcion
+      }
+    )
     .then(response=>{
       setData(data.concat(response.data));
       abrirCerrarModalInsertar();
@@ -61,17 +61,18 @@ function App() {
   }
 
   const peticionPut=async()=>{
-    var f = new FormData();
-    f.append("brandName", frameworkSeleccionado.name);
-    f.append("descBrand", frameworkSeleccionado.descripcion);
-    f.append("METHOD", "PUT");
-    await axios.put(`${methodUrl}${frameworkSeleccionado.id}`, f)
+    await axios.put(`${methodUrl}+${claseSeleccionada.id}`, 
+      {
+        "name": claseSeleccionada.name,
+        "descripcion": claseSeleccionada.descripcion
+      }
+    )
     .then(response=>{
       var dataNueva= data;
-      dataNueva.map(framework=>{
-        if(framework.id===frameworkSeleccionado.id){
-          framework.name=frameworkSeleccionado.name;
-          framework.descripcion=frameworkSeleccionado.descripcion;
+      dataNueva.map(clase=>{
+        if(clase.id===claseSeleccionada.id){
+          clase.name=claseSeleccionada.name;
+          clase.descripcion=claseSeleccionada.descripcion;
         }
       });
       setData(dataNueva,response.data);
@@ -82,19 +83,17 @@ function App() {
   }
 
   const peticionDelete=async()=>{
-    var f = new FormData();
-    f.append("METHOD", "DELETE");
-    await axios.delete(`${methodUrl}+${frameworkSeleccionado.id}`, f)
+    await axios.delete(`${methodUrl}+${claseSeleccionada.id}`)
     .then(response=>{
-      setData(data.filter(framework=>framework.id!==frameworkSeleccionado.id));
+      setData(data.filter(clase=>clase.id!==claseSeleccionada.id));
       abrirCerrarModalEliminar();
     }).catch(error=>{
       console.log(error);
     })
   }
 
-  const seleccionarFramework=(framework, caso)=>{
-    setFrameworkSeleccionado(framework);
+  const seleccionarClase=(clase, caso)=>{
+    setClaseSeleccionada(clase);
 
     (caso==="Editar")?
     abrirCerrarModalEditar():
@@ -120,14 +119,14 @@ function App() {
             </tr>
           </thead>
           <tbody>
-            {data.map(framework=>(
-              <tr key={framework.id}>
-                <td>{framework.id}</td>
-                <td>{framework.name}</td>
-                <td>{framework.descripcion}</td>
+            {data.map(clase=>(
+              <tr key={clase.id}>
+                <td>{clase.id}</td>
+                <td>{clase.name}</td>
+                <td>{clase.descripcion}</td>
               <td>
-              <button className="btn btn-primary" onClick={()=>seleccionarFramework(framework, "Editar")}>Editar</button> {"  "}
-              <button className="btn btn-danger" onClick={()=>seleccionarFramework(framework, "Eliminar")}>Eliminar</button>
+              <button className="btn btn-primary" onClick={()=>seleccionarClase(clase, "Editar")}>Editar</button> {"  "}
+              <button className="btn btn-danger" onClick={()=>seleccionarClase(clase, "Eliminar")}>Eliminar</button>
               </td>
               </tr>
             ))}
@@ -139,7 +138,7 @@ function App() {
     
     
         <Modal isOpen={modalInsertar}>
-          <ModalHeader>Insertar Framework</ModalHeader>
+          <ModalHeader>Insertar Brand</ModalHeader>
           <ModalBody>
             <div className="form-group">
               <label>Nombre: </label>
@@ -161,16 +160,16 @@ function App() {
     
         
         <Modal isOpen={modalEditar}>
-          <ModalHeader>Editar Framework</ModalHeader>
+          <ModalHeader>Editar Brand</ModalHeader>
           <ModalBody>
             <div className="form-group">
               <label>name: </label>
               <br />
-              <input type="text" className="form-control" name="name" onChange={handleChange} value={frameworkSeleccionado && frameworkSeleccionado.name}/>
+              <input type="text" className="form-control" name="name" onChange={handleChange} value={claseSeleccionada && claseSeleccionada.name}/>
               <br />
               <label>descripcion: </label>
               <br />
-              <input type="text" className="form-control" name="descripcion" onChange={handleChange} value={frameworkSeleccionado && frameworkSeleccionado.descripcion}/>
+              <input type="text" className="form-control" name="descripcion" onChange={handleChange} value={claseSeleccionada && claseSeleccionada.descripcion}/>
               <br />
             </div>
           </ModalBody>
@@ -182,7 +181,7 @@ function App() {
     
         <Modal isOpen={modalEliminar}>
             <ModalBody>
-            ¿Estás seguro que deseas eliminar el Framework {frameworkSeleccionado && frameworkSeleccionado.name}?
+            ¿Estás seguro que deseas eliminar el Brand {claseSeleccionada && claseSeleccionada.name}?
             </ModalBody>
             <ModalFooter>
               <button className="btn btn-danger" onClick={()=>peticionDelete()}>
